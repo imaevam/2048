@@ -2,7 +2,8 @@ import pygame
 import random
 import sys
 from logics import get_empty_list, get_index_from_number, \
-        is_zero_in_mas, pretty_print, insert_2_or_4
+        is_zero_in_mas, pretty_print, insert_2_or_4, move_left, \
+            move_right, move_up, move_down, can_move
 
 def draw_interface():
     pygame.draw.rect(screen, WHITE, TITLE_REC)
@@ -32,7 +33,10 @@ COLOURS = {
     0: (130, 130, 130),
     2: (255, 255, 255),
     4: (255, 255, 128), 
-    8: (255, 255, 0)
+    8: (255, 255, 0), 
+    16: (255, 235, 255),
+    32: (255, 235, 128),
+    64: (255, 235, 0)
 }
 
 WHITE = (255, 255, 255) #по моделе RBG
@@ -57,12 +61,20 @@ pygame.display.set_caption('2048')
 draw_interface()
 pygame.display.update()
 
-while is_zero_in_mas: # начать цикл игры
+while is_zero_in_mas(mas) or can_move(mas): # цикл игры: игра продолжается, пока есть свободный ячейки, либо цифры, которые можно объединить
     for event in pygame.event.get(): #стандартный обработчик событий
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit(0)
         elif event.type == pygame.KEYDOWN: #input()
+            if event.key == pygame.K_LEFT:
+                mas = move_left(mas)
+            elif event.key == pygame.K_RIGHT:
+                mas = move_right(mas)
+            elif event.key == pygame.K_UP:
+                mas = move_up(mas)
+            elif event.key == pygame.K_DOWN:
+                mas = move_down(mas)
             empty = get_empty_list(mas) # найти пустые клетки, сформировать список чисел, которые не заполнены
             random.shuffle(empty) # если есть пустые клетки, случайно выбрать одну из них
             random_num = empty.pop()
