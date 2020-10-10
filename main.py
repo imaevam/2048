@@ -5,6 +5,23 @@ from logics import get_empty_list, get_index_from_number, \
         is_zero_in_mas, pretty_print, insert_2_or_4, move_left, \
             move_right, move_up, move_down, can_move
 
+from database import get_best, cur
+
+GAMERS_DB = get_best()
+
+def draw_top_gamers():
+    font_top = pygame.font.SysFont('simsun', 30)
+    font_gamer = pygame.font.SysFont('simsun', 24)
+    text_head = font_top.render('Best tries: ', True, COLOUR_TEXT)
+    screen.blit(text_head, (250, 5))
+    for index, gamer in enumerate(GAMERS_DB):
+        name, score = gamer
+        s = f"{index + 1}. {name} - {score}"
+        text_gamer = font_gamer.render(s, True, COLOUR_TEXT)
+        screen.blit(text_gamer, (250, 30 + 30 * index))
+        print(index, name, score)
+
+
 def draw_interface(score, delta=0):
     pygame.draw.rect(screen, WHITE, TITLE_REC)
     font = pygame.font.SysFont('stxingkai', 70)
@@ -18,6 +35,7 @@ def draw_interface(score, delta=0):
         text_delta = font_delta.render(f'+{delta}', True, COLOUR_TEXT)
         screen.blit(text_delta, (170, 65))
     pretty_print(mas)
+    draw_top_gamers()
     for row in range(BLOCKS):
         for column in range(BLOCKS):  #отрисовка интерфейса
             value = mas[row][column]
@@ -61,15 +79,65 @@ HEIGTH = WIDTH + 110
 TITLE_REC = pygame.Rect(0, 0, WIDTH, 110)
 
 score = 0
+USER_NAME = None
 
 mas[1][2] = 2 # положить в массив два значения
 mas[3][0] = 4
 print(get_empty_list(mas))
 pretty_print(mas)
 
+#for gamer in get_best():
+#    print(gamer)
+
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGTH))
 pygame.display.set_caption('2048')
+
+
+def draw_intro():
+    img2048 = pygame.image.load("2048.png")
+    font = pygame.font.SysFont('stxingkai', 70)
+    text_welcome = font.render('Welcome!', True, WHITE)
+    name = 'Как Вас зовут?'
+    is_find_name = False
+    while not is_find_name:
+
+        for event in pygame.event.get(): #стандартный обработчик событий
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                if event.unicode.isalpha():
+                    if name == 'Как Вас зовут?':
+                        name = event.unicode
+                    else: 
+                        name += event.unicode
+                elif event.key == pygame.K_BACKSPACE:
+                    name = name[:-1]
+                elif event.key == pygame.K_RETURN:
+                    if len(name) > 2:
+                        global USER_NAME 
+                        USER_NAME = name
+                        is_find_name = True
+                        break
+
+
+        screen.fill(BLACK)
+        text_name = font.render(name, True, WHITE)
+        rect_name = text_name.get_rect()
+        rect_name.center = screen.get_rect().center
+
+        screen.blit(pygame.transform.scale(img2048, [200, 200]), [10, 10])
+        screen.blit(text_welcome, [230, 80])
+        screen.blit(text_name, rect_name)
+        pygame.display.update()
+    screen.fill(BLACK)
+
+
+draw_intro()
+
+
+
 draw_interface(score)
 pygame.display.update()
 
@@ -97,4 +165,5 @@ while is_zero_in_mas(mas) or can_move(mas): # цикл игры: игра про
             print(f'Мы заполнили элемент под номером {random_num}') #если пустых клеток нет, нельзя двигать массив, то игра окончена
             draw_interface(score, delta)
             pygame.display.update()
+    print(USER_NAME)
     
