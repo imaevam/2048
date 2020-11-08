@@ -92,12 +92,12 @@ def init_const():
     mas = insert_2_or_4(mas, x2, y2)
     score = 0
 
+
 mas = None
 score = None
 init_const()
 
 USERNAME = None
-
 
 print(get_empty_list(mas))
 pretty_print(mas)
@@ -160,9 +160,10 @@ def draw_game_over():
     if score > best_score:
         text = "Рекорд побит"
     else:
-        text = f'Рекорд {best_score}'
+        text = f'Рекорд: {best_score}'
     text_record = font_game_end.render(text, True, WHITE)
     insert_result(USERNAME, score)
+    GAMERS_DB = get_best()
     make_decision = False
     while not make_decision:
         for event in pygame.event.get():
@@ -191,6 +192,7 @@ def game_loop():
     global score, mas
     draw_interface(score)
     pygame.display.update()
+    is_mas_move = False
     while is_zero_in_mas(mas) or can_move(mas): # цикл игры: игра продолжается, пока есть свободный ячейки, либо цифры, которые можно объединить
         for event in pygame.event.get(): #стандартный обработчик событий
             if event.type == pygame.QUIT:
@@ -199,23 +201,24 @@ def game_loop():
             elif event.type == pygame.KEYDOWN: #input()
                 delta = 0
                 if event.key == pygame.K_LEFT:
-                    mas, delta = move_left(mas)
+                    mas, delta, is_mas_move = move_left(mas)
                 elif event.key == pygame.K_RIGHT:
-                    mas, delta = move_right(mas)
+                    mas, delta, is_mas_move = move_right(mas)
                 elif event.key == pygame.K_UP:
-                    mas, delta = move_up(mas)
+                    mas, delta, is_mas_move = move_up(mas)
                 elif event.key == pygame.K_DOWN:
-                    mas, delta = move_down(mas)
+                    mas, delta, is_mas_move = move_down(mas)
                 score += delta
 
-                if is_zero_in_mas(mas):
+                if is_zero_in_mas(mas) and is_mas_move:
                     empty = get_empty_list(mas) # найти пустые клетки, сформировать список чисел, которые не заполнены
                     random.shuffle(empty) # если есть пустые клетки, случайно выбрать одну из них
                     random_num = empty.pop()
                     x, y = get_index_from_number(random_num) #в случайно выбранную ячейку положить либо 2, либо 4
                     mas = insert_2_or_4(mas, x, y)
                     print(f'Мы заполнили элемент под номером {random_num}') #если пустых клеток нет, нельзя двигать массив, то игра окончена
-            
+                    is_mas_move = False
+
                 draw_interface(score, delta)
                 pygame.display.update()
 

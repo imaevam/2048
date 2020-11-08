@@ -1,4 +1,5 @@
-import random 
+import random
+import copy
 
 def pretty_print(mas):
     print('-' * 10)
@@ -34,13 +35,16 @@ def get_empty_list(mas):
                 empty.append(num)
     return empty
 
+
 def is_zero_in_mas(mas):
     for row in mas:
         if 0 in row:
             return True
     return False
 
+
 def move_left(mas):
+    origin = copy.deepcopy(mas)
     delta = 0
     for row in mas:
         while 0 in row:
@@ -54,10 +58,12 @@ def move_left(mas):
                 delta += mas[i][j]
                 mas[i].pop(j + 1)
                 mas[i].append(0)
-    return mas, delta
+    return mas, delta, not origin == mas
+
 
 def move_right(mas):
     delta = 0
+    origin = copy.deepcopy(mas)
     for row in mas:
         while 0 in row:
             row.remove(0)
@@ -70,10 +76,12 @@ def move_right(mas):
                 delta += mas[i][j]
                 mas[i].pop(j - 1)
                 mas[i].insert(0, 0) # значение и индекс
-    return mas, delta
+    return mas, delta, not origin == mas
+
 
 def move_up(mas):
     delta = 0
+    origin = copy.deepcopy(mas)
     for j in range(4):
         column = []
         for i in range(4):
@@ -89,10 +97,12 @@ def move_up(mas):
                 column.append(0)
         for i in range(4):
             mas[i][j] = column[i]
-    return mas, delta
+    return mas, delta, not origin == mas
+
 
 def move_down(mas):
     delta = 0
+    origin = copy.deepcopy(mas)
     for j in range(4):
         column = []
         for i in range(4):
@@ -108,11 +118,12 @@ def move_down(mas):
                 column.insert(0, 0)
         for i in range(4):
             mas[i][j] = column[i]
-    return mas, delta
+    return mas, delta, not origin == mas
+
 
 def can_move(mas):
     for i in range(3):
         for j in range(3):
             if mas[i][j] == mas[i][j + 1] or mas[i][j] == mas[i + 1][j]:
                 return True
-    return False
+    return mas[3][3] == mas[2][3] or mas[3][3] == mas[3][2]
