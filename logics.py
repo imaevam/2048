@@ -70,7 +70,7 @@ def move_right(mas):
                 delta += mas[i][j]
                 mas[i].pop(j - 1)
                 mas[i].insert(0, 0) # значение и индекс
-    return mas
+    return mas, delta
 
 def move_up(mas):
     delta = 0

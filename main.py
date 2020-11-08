@@ -74,17 +74,31 @@ HEIGTH = WIDTH + 110
 TITLE_REC = pygame.Rect(0, 0, WIDTH, 110)
 
 
-mas = [
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0]
-]
-score = 0
-USER_NAME = None
+def init_const():
+    global score, mas
+    mas = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+    empty = get_empty_list(mas)
+    random.shuffle(empty)
+    random_num1 = empty.pop()
+    random_num2 = empty.pop()
+    x1, y1 = get_index_from_number(random_num1)
+    mas = insert_2_or_4(mas, x1, y1)
+    x2, y2 = get_index_from_number(random_num2)
+    mas = insert_2_or_4(mas, x2, y2)
+    score = 0
 
-mas[1][2] = 2 # положить в массив два значения
-mas[3][0] = 4
+mas = None
+score = None
+init_const()
+
+USERNAME = None
+
+
 print(get_empty_list(mas))
 pretty_print(mas)
 
@@ -118,8 +132,8 @@ def draw_intro():
                     name = name[:-1]
                 elif event.key == pygame.K_RETURN:
                     if len(name) > 2:
-                        global USER_NAME 
-                        USER_NAME = name
+                        global USERNAME 
+                        USERNAME = name
                         is_find_name = True
                         break
 
@@ -134,37 +148,36 @@ def draw_intro():
         screen.blit(text_name, rect_name)
         pygame.display.update()
     screen.fill(BLACK)
-    print(USER_NAME)
+    print(USERNAME)
 
 def draw_game_over():
     global USERNAME, mas, score, GAMERS_DB
-    img = pygame.image.load("2048_logo.svg.png")
+    img = pygame.image.load("2048.png")
     font_game_end = pygame.font.SysFont("simsum", 70)
     text_game_end = font_game_end.render("The end", True, WHITE)
     text_score = font_game_end.render('Your score is: {0}'.format(score), True, WHITE)
     best_score = GAMERS_DB[0][1]
     if score > best_score:
-        text = "YOU WIN"
+        text = "Рекорд побит"
     else:
-        text = 'Record {0}'.format(best_score)
+        text = f'Рекорд {best_score}'
     text_record = font_game_end.render(text, True, WHITE)
     insert_result(USERNAME, score)
-    GAMERS_DB = get_best()
-    make_desigion = False
-    while not make_desigion:
+    make_decision = False
+    while not make_decision:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE:  # пробел
                     # restart with name
-                    make_desigion = True
+                    make_decision = True
                     init_const()
-                elif event.key == pygame.K_RETURN:
+                elif event.key == pygame.K_RETURN:  # enter
                     # restart new gamer
                     USERNAME = None
-                    make_desigion = True
+                    make_decision = True
                     init_const()
         screen.fill(BLACK)
         screen.blit(text_game_end, (220, 80))
@@ -179,33 +192,38 @@ def game_loop():
     draw_interface(score)
     pygame.display.update()
     while is_zero_in_mas(mas) or can_move(mas): # цикл игры: игра продолжается, пока есть свободный ячейки, либо цифры, которые можно объединить
-    for event in pygame.event.get(): #стандартный обработчик событий
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit(0)
-        elif event.type == pygame.KEYDOWN: #input()
-            delta = 0
-            if event.key == pygame.K_LEFT:
-                mas, delta = move_left(mas)
-            elif event.key == pygame.K_RIGHT:
-                mas, delta = move_right(mas)
-            elif event.key == pygame.K_UP:
-                mas, delta = move_up(mas)
-            elif event.key == pygame.K_DOWN:
-                mas, delta = move_down(mas)
-            score += delta
-            empty = get_empty_list(mas) # найти пустые клетки, сформировать список чисел, которые не заполнены
-            random.shuffle(empty) # если есть пустые клетки, случайно выбрать одну из них
-            random_num = empty.pop()
-            x, y = get_index_from_number(random_num) #в случайно выбранную ячейку положить либо 2, либо 4
-            mas = insert_2_or_4(mas, x, y)
-            print(f'Мы заполнили элемент под номером {random_num}') #если пустых клеток нет, нельзя двигать массив, то игра окончена
-            draw_interface(score, delta)
-            pygame.display.update()
-    print(USER_NAME)
+        for event in pygame.event.get(): #стандартный обработчик событий
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN: #input()
+                delta = 0
+                if event.key == pygame.K_LEFT:
+                    mas, delta = move_left(mas)
+                elif event.key == pygame.K_RIGHT:
+                    mas, delta = move_right(mas)
+                elif event.key == pygame.K_UP:
+                    mas, delta = move_up(mas)
+                elif event.key == pygame.K_DOWN:
+                    mas, delta = move_down(mas)
+                score += delta
+
+                if is_zero_in_mas(mas):
+                    empty = get_empty_list(mas) # найти пустые клетки, сформировать список чисел, которые не заполнены
+                    random.shuffle(empty) # если есть пустые клетки, случайно выбрать одну из них
+                    random_num = empty.pop()
+                    x, y = get_index_from_number(random_num) #в случайно выбранную ячейку положить либо 2, либо 4
+                    mas = insert_2_or_4(mas, x, y)
+                    print(f'Мы заполнили элемент под номером {random_num}') #если пустых клеток нет, нельзя двигать массив, то игра окончена
+            
+                draw_interface(score, delta)
+                pygame.display.update()
+
+        print(USERNAME)
     
+
 while True:
-    if USER_NAME is None:
+    if USERNAME is None:
         draw_intro()
     game_loop()
     draw_game_over()
