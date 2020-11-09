@@ -1,3 +1,5 @@
+import json
+import os
 import pygame
 import random
 import sys
@@ -95,9 +97,18 @@ def init_const():
 
 mas = None
 score = None
-init_const()
-
 USERNAME = None
+path = os.getcwd()
+if 'data.txt' in os.listdir():
+    with open('data.txt') as file:
+        data = json.load(file)
+        mas = data['mas']
+        score = data['score']
+        USERNAME = data['user']
+    full_path = os.path.join(path, 'data.txt')
+    os.remove(full_path)
+else:
+    init_const()
 
 print(get_empty_list(mas))
 pretty_print(mas)
@@ -188,6 +199,17 @@ def draw_game_over():
         pygame.display.update()
     screen.fill(BLACK)
 
+
+def save_game():
+    data = {
+        'user': USERNAME,
+        'score': score,
+        'mas': mas
+    }
+    with open('data.txt', 'w') as outfile:
+        json.dump(data, outfile)
+
+
 def game_loop():
     global score, mas
     draw_interface(score)
@@ -196,6 +218,7 @@ def game_loop():
     while is_zero_in_mas(mas) or can_move(mas): # цикл игры: игра продолжается, пока есть свободный ячейки, либо цифры, которые можно объединить
         for event in pygame.event.get(): #стандартный обработчик событий
             if event.type == pygame.QUIT:
+                save_game()
                 pygame.quit()
                 sys.exit(0)
             elif event.type == pygame.KEYDOWN: #input()
